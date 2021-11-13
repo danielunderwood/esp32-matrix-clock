@@ -52,6 +52,7 @@ use esp_idf_svc::nvs::*;
 use esp_idf_svc::ping;
 use esp_idf_svc::sysloop::*;
 use esp_idf_svc::wifi::*;
+use esp_idf_svc::sntp::*;
 
 use esp_idf_hal::delay;
 use esp_idf_hal::gpio;
@@ -149,26 +150,49 @@ fn main() -> Result<()> {
     #[cfg(esp_idf_config_lwip_ipv4_napt)]
     enable_napt(&mut wifi)?;
 
-    let mutex = Arc::new((Mutex::new(None), Condvar::new()));
+    // let mutex = Arc::new((Mutex::new(None), Condvar::new()));
 
-    let httpd = httpd(mutex.clone())?;
+    // This is somehow necessary for to infer types in the loop below
+    // let httpd = httpd(mutex.clone())?;
 
-    let mut wait = mutex.0.lock().unwrap();
+    // let mut wait = mutex.0.lock().unwrap();
 
-    #[allow(unused)]
-    let cycles = loop {
-        if let Some(cycles) = *wait {
-            break cycles;
-        } else {
-            wait = mutex.1.wait(wait).unwrap();
+    // #[allow(unused)]
+    // let cycles = loop {
+    //     if let Some(cycles) = *wait {
+    //         info!("In cycle");
+    //         break cycles;
+    //     } else {
+    //         info!("Mutex");
+    //         wait = mutex.1.wait(wait).unwrap();
+    //     }
+    // };
+
+    let sntp = EspSntp::new(&SntpConf::default())?;
+
+    loop {
+        // TODO It would probably be good to wait here until the sync is done, but it seems
+        // like it's in the reset phase most of the time. The commits have something about a
+        // Waitable trait that we may be able to use, but I don't see it directly in the code
+        match sntp.get_sync_status() {
+            SyncStatus::Reset => info!("Sync status: reset"),
+            SyncStatus::Completed => info!("Sync status: completed"),
+            SyncStatus::InProgress => info!("Sync status: in progress"),
+            _ => unreachable!()
         }
-    };
+        match SystemTime::now().duration_since(UNIX_EPOCH) {
+            Ok(n) => info!("In loop, currently {} seconds since unix epoch", n.as_secs()),
+            Err(_) => error!("Before unix epoch!"),
+        }
+        thread::sleep(Duration::from_secs(1));
+    }
 
     for s in 0..3 {
         info!("Shutting down in {} secs", 3 - s);
         thread::sleep(Duration::from_secs(1));
     }
 
+    drop(sntp);
     // drop(httpd);
     // info!("Httpd stopped");
 
