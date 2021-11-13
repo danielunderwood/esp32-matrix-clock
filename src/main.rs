@@ -76,6 +76,8 @@ use ili9341;
 use ssd1306;
 use ssd1306::mode::DisplayConfig;
 use st7789;
+use chrono;
+use chrono_tz::America::New_York;
 
 #[allow(dead_code)]
 #[cfg(not(feature = "qemu"))]
@@ -180,10 +182,10 @@ fn main() -> Result<()> {
             SyncStatus::InProgress => info!("Sync status: in progress"),
             _ => unreachable!()
         }
-        match SystemTime::now().duration_since(UNIX_EPOCH) {
-            Ok(n) => info!("In loop, currently {} seconds since unix epoch", n.as_secs()),
-            Err(_) => error!("Before unix epoch!"),
-        }
+        // TODO This should probably be configurable at least at build time
+        // Once we get some network updates, we could have it receive a message to change time zones
+        let time = chrono::Utc::now().with_timezone(&New_York);
+        info!("It is currently {}", time);
         thread::sleep(Duration::from_secs(1));
     }
 

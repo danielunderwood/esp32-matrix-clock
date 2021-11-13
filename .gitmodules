@@ -1,0 +1,3 @@
+[submodule "dependencies/chrono"]
+	path = dependencies/chrono
+	url = https://github.com/danielunderwood/chrono

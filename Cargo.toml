@@ -16,6 +16,7 @@ polling = { git = "https://github.com/esp-rs-compat/polling" }
 socket2 = { git = "https://github.com/esp-rs-compat/socket2" }
 getrandom = { version = "0.2", git = "https://github.com/esp-rs-compat/getrandom.git" }
 getrandom1 = { version = "0.1", git = "https://github.com/esp-rs-compat/getrandom.git", package = "getrandom", branch = "0.1" }
+chrono = { path = "./dependencies/chrono" }
 
 [profile.release]
 debug = true # Symbols are nice and they don't increase the size on Flash
@@ -66,6 +67,8 @@ st7789 = "0.6"
 ili9341 = { version = "0.5", git = "https://github.com/yuri91/ili9341-rs" }
 ssd1306 = "0.7"
 smol = "1.2"
+chrono = "0.4.19"
+chrono-tz = "0.4"
 
 [build-dependencies]
 embuild = "0.25"
