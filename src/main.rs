@@ -96,11 +96,11 @@ thread_local! {
 fn main() -> Result<()> {
     esp_idf_sys::link_patches();
 
-    test_print();
+    // test_print();
 
-    test_atomics();
+    // test_atomics();
 
-    test_threads();
+    // test_threads();
 
     // Bind the log crate to the ESP Logging facilities
     esp_idf_svc::log::EspLogger::initialize_default();
@@ -121,43 +121,6 @@ fn main() -> Result<()> {
     #[allow(unused)]
     let default_nvs = Arc::new(EspDefaultNvs::new()?);
 
-    #[cfg(feature = "ttgo")]
-    ttgo_hello_world(
-        pins.gpio4,
-        pins.gpio16,
-        pins.gpio23,
-        peripherals.spi2,
-        pins.gpio18,
-        pins.gpio19,
-        pins.gpio5,
-    )?;
-
-    #[cfg(feature = "kaluga")]
-    kaluga_hello_world(
-        pins.gpio6,
-        pins.gpio13,
-        pins.gpio16,
-        peripherals.spi3,
-        pins.gpio15,
-        pins.gpio9,
-        pins.gpio11,
-        true,
-    )?;
-
-    #[cfg(feature = "heltec")]
-    heltec_hello_world(pins.gpio16, peripherals.i2c0, pins.gpio4, pins.gpio15)?;
-
-    #[cfg(feature = "esp32s3_usb_otg")]
-    esp32s3_usb_otg_hello_world(
-        pins.gpio9,
-        pins.gpio4,
-        pins.gpio8,
-        peripherals.spi3,
-        pins.gpio6,
-        pins.gpio7,
-        pins.gpio5,
-    )?;
-
     #[cfg(not(feature = "qemu"))]
     #[allow(unused_mut)]
     let mut wifi = wifi(
@@ -172,56 +135,15 @@ fn main() -> Result<()> {
         sys_loop_stack.clone(),
     )?))?;
 
-    #[cfg(feature = "ip101")]
-    let eth = eth_configure(Box::new(EspEth::new_rmii(
-        netif_stack.clone(),
-        sys_loop_stack.clone(),
-        RmiiEthPeripherals {
-            rmii_rdx0: pins.gpio25,
-            rmii_rdx1: pins.gpio26,
-            rmii_crs_dv: pins.gpio27,
-            rmii_mdc: pins.gpio23,
-            rmii_txd1: pins.gpio22,
-            rmii_tx_en: pins.gpio21,
-            rmii_txd0: pins.gpio19,
-            rmii_mdio: pins.gpio18,
-            rmii_ref_clk: pins.gpio0,
-            rst: Some(pins.gpio5),
-        },
-        RmiiEthChipset::IP101,
-        None,
-    )?))?;
+    // test_tcp()?;
 
-    #[cfg(feature = "w5500")]
-    let eth = eth_configure(Box::new(EspEth::new_spi(
-        netif_stack.clone(),
-        sys_loop_stack.clone(),
-        SpiEthPeripherals {
-            int_pin: pins.gpio13,
-            rst_pin: Some(pins.gpio25),
-            spi_pins: spi::Pins {
-                sclk: pins.gpio12,
-                sdo: pins.gpio26,
-                sdi: Some(pins.gpio27),
-                cs: Some(pins.gpio14),
-            },
-            spi: peripherals.spi2,
-        },
-        SpiEthChipset::W5500,
-        20.MHz().into(),
-        Some(&[0x02, 0x00, 0x00, 0x12, 0x34, 0x56]),
-        None,
-    )?))?;
+    // test_tcp_bind()?;
 
-    test_tcp()?;
+    // #[cfg(esp_idf_version = "4.4")]
+    // test_tcp_bind_async()?;
 
-    test_tcp_bind()?;
-
-    #[cfg(esp_idf_version = "4.4")]
-    test_tcp_bind_async()?;
-
-    #[cfg(feature = "experimental")]
-    test_https_client()?;
+    // #[cfg(feature = "experimental")]
+    // test_https_client()?;
 
     #[cfg(not(feature = "qemu"))]
     #[cfg(esp_idf_config_lwip_ipv4_napt)]
@@ -247,8 +169,8 @@ fn main() -> Result<()> {
         thread::sleep(Duration::from_secs(1));
     }
 
-    drop(httpd);
-    info!("Httpd stopped");
+    // drop(httpd);
+    // info!("Httpd stopped");
 
     #[cfg(not(feature = "qemu"))]
     {
