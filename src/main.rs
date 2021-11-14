@@ -171,6 +171,8 @@ fn main() -> Result<()> {
     // };
 
     let sntp = EspSntp::new(&SntpConf::default())?;
+    // TODO Make pin configurable
+    let mut led = pins.gpio21.into_output().unwrap();
 
     loop {
         // TODO It would probably be good to wait here until the sync is done, but it seems
@@ -186,6 +188,8 @@ fn main() -> Result<()> {
         // Once we get some network updates, we could have it receive a message to change time zones
         let time = chrono::Utc::now().with_timezone(&New_York);
         info!("It is currently {}", time);
+        // Status LED
+        led.set_high().unwrap();
         thread::sleep(Duration::from_secs(1));
     }
 
